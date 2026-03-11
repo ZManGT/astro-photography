@@ -1,50 +1,559 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+// src/pages/index.astro
+// photography.zeranski.org
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
-					>read the docs
-				</a> or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template
-				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Family photos — lacrosse, travel, and life." />
+  <title>photography.zeranski.org</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0e;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --text: #e8e8e8;
+      --text-muted: #888;
+      --accent: #c8a96e;
+      --nav-height: 56px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--nav-height);
+      background: rgba(14,14,14,0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+    }
+
+    .nav-logo {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 1.75rem;
+      list-style: none;
+    }
+    .nav-links button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+      cursor: pointer;
+      padding: 0;
+    }
+    .nav-links button:hover,
+    .nav-links button.active { color: var(--text); }
+
+    /* ── ALBUMS GRID ── */
+    main { padding: 2.5rem 2rem 4rem; max-width: 1400px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .albums-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .album-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--surface);
+      aspect-ratio: 4/3;
+    }
+
+    .album-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.4s;
+      filter: brightness(0.75);
+    }
+
+    .album-card:hover img {
+      transform: scale(1.04);
+      filter: brightness(0.55);
+    }
+
+    .album-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 2rem 1.25rem 1.25rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+      transform: translateY(4px);
+      transition: transform 0.3s;
+    }
+    .album-card:hover .album-info { transform: translateY(0); }
+
+    .album-title {
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .album-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* ── ALBUM DETAIL VIEW ── */
+    .album-view {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--bg);
+      overflow-y: auto;
+    }
+    .album-view.open { display: block; }
+
+    .album-view-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: var(--nav-height);
+      background: rgba(14,14,14,0.9);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      gap: 1rem;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--text); }
+    .back-btn svg { width: 16px; height: 16px; }
+
+    .album-view-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .album-view-count {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .photo-masonry {
+      columns: 3;
+      column-gap: 1px;
+      padding: 1px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 900px) { .photo-masonry { columns: 2; } }
+    @media (max-width: 560px) { .photo-masonry { columns: 1; } }
+
+    .photo-item {
+      break-inside: avoid;
+      margin-bottom: 1px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      background: var(--surface);
+    }
+
+    .photo-item img {
+      width: 100%;
+      display: block;
+      transition: filter 0.3s;
+      filter: brightness(0.9);
+    }
+    .photo-item:hover img { filter: brightness(0.65); }
+
+    .photo-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .photo-item:hover .photo-overlay { opacity: 1; }
+    .photo-overlay svg { width: 32px; height: 32px; color: white; }
+
+    /* ── FULLSCREEN VIEWER ── */
+    .viewer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(0,0,0,0.96);
+      align-items: center;
+      justify-content: center;
+    }
+    .viewer.open { display: flex; }
+
+    .viewer img {
+      max-width: 92vw;
+      max-height: 92vh;
+      object-fit: contain;
+      user-select: none;
+    }
+
+    .viewer-close {
+      position: absolute;
+      top: 1.25rem; right: 1.5rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.5rem;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .viewer-close:hover { color: var(--text); }
+
+    .viewer-prev, .viewer-next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .viewer-prev:hover, .viewer-next:hover { background: rgba(255,255,255,0.12); }
+    .viewer-prev { left: 1.5rem; }
+    .viewer-next { right: 1.5rem; }
+    .viewer-prev svg, .viewer-next svg { width: 18px; height: 18px; }
+
+    .viewer-caption {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%; transform: translateX(-50%);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <button class="nav-logo" onclick="showHome()">photography<span>.zeranski</span></button>
+  <ul class="nav-links">
+    <li><button id="nav-albums" class="active" onclick="showHome()">Albums</button></li>
+  </ul>
+</nav>
+
+<!-- ── HOME: ALBUMS ── -->
+<main id="home-view">
+  <p class="section-label">All Albums</p>
+  <div class="albums-grid" id="albums-grid"></div>
+</main>
+
+<!-- ── ALBUM DETAIL VIEW ── -->
+<div class="album-view" id="album-view">
+  <div class="album-view-header">
+    <button class="back-btn" onclick="closeAlbum()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      All Albums
+    </button>
+    <span class="album-view-title" id="album-view-title"></span>
+    <span class="album-view-count" id="album-view-count"></span>
+  </div>
+  <div class="photo-masonry" id="photo-masonry"></div>
+</div>
+
+<!-- ── FULLSCREEN VIEWER ── -->
+<div class="viewer" id="viewer">
+  <button class="viewer-close" onclick="closeViewer()">✕</button>
+  <button class="viewer-prev" onclick="prevPhoto()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M15 18l-6-6 6-6"/>
+    </svg>
+  </button>
+  <img id="viewer-img" src="" alt="" />
+  <button class="viewer-next" onclick="nextPhoto()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M9 18l6-6-6-6"/>
+    </svg>
+  </button>
+  <span class="viewer-caption" id="viewer-caption"></span>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer id="footer">
+  photography.zeranski.org &nbsp;·&nbsp; All rights reserved
+</footer>
+
+<script>
+  // ─────────────────────────────────────────────────────────────
+  //  ALBUMS DATA
+  //  To add a new album:
+  //    1. Upload photos to Cloudflare R2 and make the bucket public
+  //    2. Add a new object to this array following the same structure
+  //    3. Replace the src URLs with your R2 public URLs, e.g.:
+  //       "https://pub-XXXXXXXXXXXX.r2.dev/album-folder/photo.jpg"
+  // ─────────────────────────────────────────────────────────────
+  const albums = [
+    {
+      id: "lacrosse-2024",
+      title: "Lacrosse — Spring 2024",
+      date: "Apr – Jun 2024",
+      cover: "https://images.unsplash.com/photo-1551958219-acbc595d816f?w=800&q=80",
+      photos: [
+        { src: "https://images.unsplash.com/photo-1551958219-acbc595d816f?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=1200&q=85", caption: "" },
+      ]
+    },
+    {
+      id: "lacrosse-2025",
+      title: "Lacrosse — Spring 2025",
+      date: "Mar – May 2025",
+      cover: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800&q=80",
+      photos: [
+        { src: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1551958219-acbc595d816f?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200&q=85", caption: "" },
+      ]
+    },
+    {
+      id: "trip-yellowstone",
+      title: "Yellowstone",
+      date: "August 2024",
+      cover: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80",
+      photos: [
+        { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1446329813274-7c9036bd9a1f?w=1200&q=85", caption: "" },
+      ]
+    },
+    {
+      id: "trip-beach",
+      title: "Beach Week",
+      date: "July 2024",
+      cover: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
+      photos: [
+        { src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1520942702018-0862200e6873?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1200&q=85", caption: "" },
+      ]
+    },
+    {
+      id: "holidays-2024",
+      title: "Holidays 2024",
+      date: "December 2024",
+      cover: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=800&q=80",
+      photos: [
+        { src: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=1200&q=85", caption: "" },
+      ]
+    },
+    {
+      id: "misc",
+      title: "Miscellaneous",
+      date: "Ongoing",
+      cover: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
+      photos: [
+        { src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1200&q=85", caption: "" },
+        { src: "https://images.unsplash.com/photo-1433838552652-f9a46b332c40?w=1200&q=85", caption: "" },
+      ]
+    },
+  ];
+
+  // ─────────────────────────────────────────────
+  // STATE
+  // ─────────────────────────────────────────────
+  let currentAlbum = null;
+  let viewerIndex = 0;
+
+  // ─────────────────────────────────────────────
+  // RENDER HOME
+  // ─────────────────────────────────────────────
+  function renderHome() {
+    const grid = document.getElementById('albums-grid');
+    grid.innerHTML = albums.map(album => `
+      <div class="album-card" onclick="openAlbum('${album.id}')">
+        <img src="${album.cover}" alt="${album.title}" loading="lazy" />
+        <div class="album-info">
+          <div class="album-title">${album.title}</div>
+          <div class="album-meta">${album.date} &nbsp;·&nbsp; ${album.photos.length} photos</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ─────────────────────────────────────────────
+  // OPEN / CLOSE ALBUM
+  // ─────────────────────────────────────────────
+  function openAlbum(id) {
+    currentAlbum = albums.find(a => a.id === id);
+    if (!currentAlbum) return;
+
+    document.getElementById('album-view-title').textContent = currentAlbum.title;
+    document.getElementById('album-view-count').textContent = currentAlbum.photos.length + ' photos';
+
+    const masonry = document.getElementById('photo-masonry');
+    masonry.innerHTML = currentAlbum.photos.map((p, i) => `
+      <div class="photo-item" onclick="openViewer(${i})">
+        <img src="${p.src}" alt="${p.caption || currentAlbum.title}" loading="lazy" />
+        <div class="photo-overlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('album-view').classList.add('open');
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('footer').style.display = 'none';
+    window.scrollTo(0, 0);
+  }
+
+  function closeAlbum() {
+    document.getElementById('album-view').classList.remove('open');
+    document.getElementById('home-view').style.display = '';
+    document.getElementById('footer').style.display = '';
+    currentAlbum = null;
+  }
+
+  function showHome() {
+    closeAlbum();
+    closeViewer();
+  }
+
+  // ─────────────────────────────────────────────
+  // FULLSCREEN VIEWER
+  // ─────────────────────────────────────────────
+  function openViewer(index) {
+    viewerIndex = index;
+    updateViewer();
+    document.getElementById('viewer').classList.add('open');
+  }
+
+  function closeViewer() {
+    document.getElementById('viewer').classList.remove('open');
+  }
+
+  function updateViewer() {
+    const photo = currentAlbum.photos[viewerIndex];
+    document.getElementById('viewer-img').src = photo.src;
+    document.getElementById('viewer-caption').textContent =
+      (photo.caption ? photo.caption + '  ·  ' : '') +
+      (viewerIndex + 1) + ' / ' + currentAlbum.photos.length;
+  }
+
+  function prevPhoto() {
+    if (!currentAlbum) return;
+    viewerIndex = (viewerIndex - 1 + currentAlbum.photos.length) % currentAlbum.photos.length;
+    updateViewer();
+  }
+
+  function nextPhoto() {
+    if (!currentAlbum) return;
+    viewerIndex = (viewerIndex + 1) % currentAlbum.photos.length;
+    updateViewer();
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('viewer').classList.contains('open')) return;
+    if (e.key === 'ArrowRight') nextPhoto();
+    if (e.key === 'ArrowLeft')  prevPhoto();
+    if (e.key === 'Escape')     closeViewer();
+  });
+
+  // Click backdrop to close viewer
+  document.getElementById('viewer').addEventListener('click', e => {
+    if (e.target === document.getElementById('viewer')) closeViewer();
+  });
+
+  // ─────────────────────────────────────────────
+  // INIT
+  // ─────────────────────────────────────────────
+  renderHome();
+</script>
+
+</body>
 </html>
